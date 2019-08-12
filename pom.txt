@@ -1,0 +1,183 @@
+./configure --prefix=/usr/local/nginx --pid-path=/var/run/nginx/nginx.pid --lock-path=/var/lock/nginx.lock --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_gzip_static_module --http-client-body-temp-path=/var/temp/nginx/client --http-proxy-temp-path=/var/temp/nginx/proxy --http-fastcgi-temp-path=/var/temp/nginx/fastcgi --http-uwsgi-temp-path=/var/temp/nginx/uwsgi --http-scgi-temp-path=/var/temp/nginx/scgi 
+
+
+
+
+ERROR - file: /home/zhe/install/fastdfs-nginx-module/src/common.c, line: 877, stat file: /home/zhe/fastdfs/storage/data/data/00/00/wKhvg11JGQuAd7EcAAAbq7RfVQo687.png fail, errno: 13, error info: Permission denied
+
+
+ERROR - file: /home/zhe/install/fastdfs-nginx-module/src/common.c, line: 877, stat file: /home/zhe/fastdfs/storage/data/00/00/wKhvg11JGQuAd7EcAAAbq7RfVQo687.png fail, errno: 13, error info: Permission denied
+
+
+
+
+
+
+		server:
+		  port: 9011
+		spring:
+		  application:
+		    name: s_gateway
+注册中心		eureka:
+		  client:
+		    service-url: http://127.0.0.1:9001/eureka
+网关		zuul:
+		  prefix: /org
+熔断		hystrix:
+		  command:
+		    default:
+		      execution:
+			isolation:
+			  thread:
+			    timeoutInMilliseconds: 5000
+负载均衡	ribbon:
+		  ConnectTimeout: 1000
+		  ReadTimeout: 3500
+		  MaxAutoRetries: 0
+		  MinAutoRetriesNextServer: 0
+
+
+
+<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.6.RELEASE</version>
+        <relativePath />
+    </parent>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <spring-cloud.version>Greenwich.SR2</spring-cloud.version>
+        <mapper.starter.version>2.0.3</mapper.starter.version>
+        <mysql.version>8.0.16</mysql.version>
+        <pageHelper.starter.version>1.2.5</pageHelper.starter.version>
+        <fastDFS.client.version>1.26.1-RELEASE</fastDFS.client.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tk.mybatis</groupId>
+                <artifactId>mapper-spring-boot-starter</artifactId>
+                <version>${mapper.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pageHelper.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tobato</groupId>
+                <artifactId>fastdfs-client</artifactId>
+                <version>${fastDFS.client.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+
+
+
+
+
+
+
+#user  nobody;
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    
+
+    sendfile        on;
+    
+    keepalive_timeout  65;
+
+    
+
+    server {
+        listen       80;
+        server_name  zhe.shop.org;
+	  
+	  proxy_set_header X-Forwarded-Host $host;
+	  proxy_set_header X-Forwarded-Server $host;
+	  proxy_set_header X-Forwarded-For $proxy_add_x-forwarded_for;
+       
+
+        location / {
+             proxy_pass http://192.168.0.102:9001;
+	       proxy_connect_timeout 600;
+		 proxy_read_timeout 600;
+        }    
+        
+    }
+	
+     server {
+        listen       80;
+        server_name  shop.org;
+	  
+	  proxy_set_header X-Forwarded-Host $host;
+	  proxy_set_header X-Forwarded-Server $host;
+	  proxy_set_header X-Forwarded-For $proxy_add_x-forwarded_for;
+       
+
+        location / {
+             proxy_pass http://192.168.0.102:9101;
+	       proxy_connect_timeout 600;
+		 proxy_read_timeout 600;
+        }    
+        
+    }
+
+
+    
+
+}
