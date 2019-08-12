@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: upload_service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+server:
+  port: 9202
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:9001/eureka
+fdfs:
+  so-timeout: 2500          #超时
+  connect-timeout: 600
+  thumb-image:          #缩略图
+    width: 60
+    height: 60
+  tracker-list:         #图片服务器地址
+    - 192.168.111.131:22122
+shop:
+  upload:
+    imageUrl: "http://www.shop.image.org/"
+    allowTypes:
+      - image/png
+      - image/jpg
+      - image/jpeg
+      - image/bmp

@@ -1,0 +1,29 @@
+server:
+  port: 9101
+spring:
+  application:
+    name: s_gateway
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:9001/eureka
+zuul:
+  prefix: /zhe
+  routes:
+    ITEM_SERVICE: /item/**
+    UPLOAD_SERVICE:
+      path: /upload/**                  #请求路径
+      serviceId: UPLOAD_SERVICE         #Eureka注册中心列表中的服务ID
+      strip-prefix: false               #转发请求时是否去除前缀
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 5000
+ribbon:
+  ConnectTimeout: 1000
+  ReadTimeout: 3500
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 0
